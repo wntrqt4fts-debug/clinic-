@@ -10,302 +10,385 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>MediCare Admin</title>
+  <title>Clinik Admin</title>
 
   <link rel="stylesheet" href="admin.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
+
 
 <body>
 
 
 <!-- LOGIN -->
 
-<section id="loginScreen" class="login-screen">
+<div id="loginScreen" class="login-screen">
 
-  <div class="login-card">
+  <div class="login-box">
 
-    <div class="admin-logo">
+    <div class="login-logo">
       ✚
     </div>
 
-    <h1>Admin Login</h1>
+    <p class="small-label">
+      CLINIK ADMIN
+    </p>
 
-    <p>
-      MediCare Management Dashboard
+    <h1>
+      Welcome back
+    </h1>
+
+    <p class="login-description">
+      Sign in to manage your medicine store.
     </p>
 
 
     <form id="loginForm">
 
+      <label>
+        Username
+      </label>
+
       <input
-        type="email"
-        id="loginEmail"
-        placeholder="Admin email"
+        id="username"
+        type="text"
+        placeholder="Enter username"
         required
       >
 
+
+      <label>
+        Password
+      </label>
+
       <input
+        id="password"
         type="password"
-        id="loginPassword"
-        placeholder="Password"
+        placeholder="Enter password"
         required
       >
+
 
       <button type="submit">
-        Login
+        Sign in →
       </button>
 
-      <div id="loginMessage"></div>
+      <p id="loginError"></p>
 
     </form>
 
   </div>
 
-</section>
+</div>
+
 
 
 <!-- DASHBOARD -->
 
-<section id="dashboard" class="dashboard hidden">
+<div id="dashboard" class="dashboard hidden">
 
 
-<header class="admin-header">
+  <aside class="sidebar">
 
-  <div>
-
-    <h1>MediCare Admin</h1>
-
-    <p>Clinic Management Dashboard</p>
-
-  </div>
-
-  <button id="logoutButton">
-    Logout
-  </button>
-
-</header>
-
-
-<main class="admin-main">
-
-
-<!-- STATS -->
-
-<div class="stats-grid">
-
-  <div class="stat-card">
-
-    <span>💊</span>
-
-    <div>
-      <small>Medicines</small>
-      <strong id="medicineCount">0</strong>
+    <div class="admin-logo">
+      ✚ Clinik
     </div>
 
-  </div>
-
-
-  <div class="stat-card">
-
-    <span>📅</span>
-
-    <div>
-      <small>Appointments</small>
-      <strong id="appointmentCount">0</strong>
+    <div class="sidebar-title">
+      ADMIN PANEL
     </div>
 
-  </div>
-
-
-  <div class="stat-card">
-
-    <span>📦</span>
-
-    <div>
-      <small>Products</small>
-      <strong id="productCount">0</strong>
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- ADD MEDICINE -->
-
-<div class="admin-panel">
-
-  <div class="panel-header">
-
-    <div>
-      <h2>Add Medicine</h2>
-
-      <p>
-        Add a medicine to your public website.
-      </p>
-    </div>
-
-  </div>
-
-
-  <form id="medicineForm" class="medicine-form">
-
-
-    <div class="image-upload">
-
-      <label for="medicineImage">
-        Medicine Image
-      </label>
-
-      <input
-        type="file"
-        id="medicineImage"
-        accept="image/*"
-        required
-      >
-
-      <div id="imagePreview"></div>
-
-    </div>
-
-
-    <input
-      type="text"
-      id="medicineName"
-      placeholder="Medicine name"
-      required
-    >
-
-
-    <select id="medicineCategory" required>
-
-      <option value="">
-        Select category
-      </option>
-
-      <option>
-        Pain Relief
-      </option>
-
-      <option>
-        Cold & Flu
-      </option>
-
-      <option>
-        Vitamins
-      </option>
-
-      <option>
-        First Aid
-      </option>
-
-      <option>
-        Other
-      </option>
-
-    </select>
-
-
-    <input
-      type="number"
-      id="medicinePrice"
-      placeholder="Price ₹"
-      min="0"
-      step="0.01"
-      required
-    >
-
-
-    <input
-      type="number"
-      id="medicineStock"
-      placeholder="Stock quantity"
-      min="0"
-      required
-    >
-
-
-    <textarea
-      id="medicineDescription"
-      placeholder="Medicine description"
-      rows="5"
-    ></textarea>
-
-
-    <button type="submit">
-      + Add Medicine
+    <button class="side-active">
+      💊 Medicines
     </button>
 
+    <a href="index.html">
+      🌐 View Store
+    </a>
 
-    <p id="medicineMessage"></p>
+    <button onclick="logout()" class="logout-btn">
+      ↪ Logout
+    </button>
 
-  </form>
+  </aside>
+
+
+
+  <main class="admin-main">
+
+
+    <header class="admin-header">
+
+      <div>
+        <p class="small-label">
+          DASHBOARD
+        </p>
+
+        <h1>
+          Medicine Store
+        </h1>
+      </div>
+
+      <a
+        href="index.html"
+        class="view-store"
+      >
+        View Store ↗
+      </a>
+
+    </header>
+
+
+
+    <!-- STATS -->
+
+    <section class="stats">
+
+      <div class="stat-card">
+        <span>Total Medicines</span>
+        <strong id="totalMedicines">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Categories</span>
+        <strong id="totalCategories">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>In Stock</span>
+        <strong id="totalStock">0</strong>
+      </div>
+
+    </section>
+
+
+
+    <!-- ADD MEDICINE -->
+
+    <section class="admin-card">
+
+      <div class="card-heading">
+
+        <div>
+          <p class="small-label">
+            INVENTORY
+          </p>
+
+          <h2 id="formTitle">
+            Add Medicine
+          </h2>
+        </div>
+
+        <button
+          id="cancelEdit"
+          class="cancel-btn hidden"
+          onclick="cancelEdit()"
+        >
+          Cancel
+        </button>
+
+      </div>
+
+
+      <form id="medicineForm" class="medicine-form">
+
+
+        <div class="image-upload">
+
+          <label
+            for="medicineImage"
+            class="upload-box"
+          >
+
+            <img
+              id="imagePreview"
+              src=""
+              alt=""
+            >
+
+            <div id="uploadText">
+              📷
+              <br>
+              <strong>Upload image</strong>
+              <br>
+              <small>Click to choose</small>
+            </div>
+
+          </label>
+
+          <input
+            id="medicineImage"
+            type="file"
+            accept="image/*"
+          >
+
+        </div>
+
+
+
+        <div class="form-fields">
+
+
+          <div class="field">
+
+            <label>
+              Medicine Name
+            </label>
+
+            <input
+              id="medicineName"
+              type="text"
+              placeholder="e.g. Paracetamol 500mg"
+              required
+            >
+
+          </div>
+
+
+          <div class="two-columns">
+
+            <div class="field">
+
+              <label>
+                Category
+              </label>
+
+              <select id="medicineCategory">
+
+                <option value="Pain Relief">
+                  Pain Relief
+                </option>
+
+                <option value="Cold & Flu">
+                  Cold & Flu
+                </option>
+
+                <option value="Vitamins">
+                  Vitamins
+                </option>
+
+                <option value="Digestive">
+                  Digestive
+                </option>
+
+                <option value="Other">
+                  Other
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Price (₹)
+              </label>
+
+              <input
+                id="medicinePrice"
+                type="number"
+                min="0"
+                placeholder="99"
+                required
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Stock
+            </label>
+
+            <input
+              id="medicineStock"
+              type="number"
+              min="0"
+              placeholder="50"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Description
+            </label>
+
+            <textarea
+              id="medicineDescription"
+              rows="4"
+              placeholder="Short description..."
+            ></textarea>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="save-btn"
+          >
+            <span id="saveButtonText">
+              + Add Medicine
+            </span>
+          </button>
+
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+
+    <!-- PRODUCT LIST -->
+
+    <section class="admin-card">
+
+      <div class="card-heading">
+
+        <div>
+
+          <p class="small-label">
+            PRODUCTS
+          </p>
+
+          <h2>
+            Your Medicines
+          </h2>
+
+        </div>
+
+        <input
+          id="adminSearch"
+          class="admin-search"
+          type="text"
+          placeholder="Search..."
+          oninput="renderAdminMedicines()"
+        >
+
+      </div>
+
+
+      <div
+        id="adminMedicineList"
+        class="admin-medicine-list"
+      ></div>
+
+    </section>
+
+
+  </main>
 
 </div>
-
-
-<!-- MEDICINE LIST -->
-
-<div class="admin-panel">
-
-  <div class="panel-header">
-
-    <div>
-
-      <h2>Medicine Inventory</h2>
-
-      <p>
-        Manage medicines displayed on the website.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div id="adminMedicineList">
-
-    Loading...
-
-  </div>
-
-</div>
-
-
-<!-- APPOINTMENTS -->
-
-<div class="admin-panel">
-
-  <div class="panel-header">
-
-    <div>
-
-      <h2>Appointments</h2>
-
-      <p>
-        Patient appointment requests.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div id="appointmentList">
-
-    Loading...
-
-  </div>
-
-</div>
-
-
-</main>
-
-</section>
 
 
 <script src="admin.js"></script>
