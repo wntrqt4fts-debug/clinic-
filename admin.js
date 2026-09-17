@@ -1,7 +1,7 @@
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_URL = "cdmfgppdycpzouvnhmlq";
 
-const SUPABASE_ANON_KEY =
-  "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_ANON_KEY = ".eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkbWZncHBkeWNwem91dm5obWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2NDE5ODcsImV4cCI6MjEwNTIxNzk4N30.RWHHVNhSwJWyBxEgQcqTb0-8oWXHy1XzGI8ORfIeMeM"
+
 
 
 const supabaseClient =
