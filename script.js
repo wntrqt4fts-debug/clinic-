@@ -1,107 +1,84 @@
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+let medicines = JSON.parse(
+  localStorage.getItem("clinikMedicines")
+) || [];
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+let cart = JSON.parse(
+  localStorage.getItem("clinikCart")
+) || [];
+
+let currentCategory = "All";
 
 
-// ===============================
-// LOAD MEDICINES
-// ===============================
-
-async function loadMedicines() {
-
-  const grid = document.getElementById("medicineGrid");
-
-  grid.innerHTML = `
-    <div class="loading">
-      Loading medicines...
-    </div>
-  `;
-
-  const { data, error } = await supabaseClient
-    .from("medicines")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-
-    console.error(error);
-
-    grid.innerHTML = `
-      <div class="loading">
-        Unable to load medicines.
-      </div>
-    `;
-
-    return;
-  }
-
-  displayMedicines(data);
+function saveMedicines() {
+  localStorage.setItem(
+    "clinikMedicines",
+    JSON.stringify(medicines)
+  );
 }
 
 
-// ===============================
-// DISPLAY MEDICINES
-// ===============================
-
-function displayMedicines(medicines) {
+function renderMedicines(list = medicines) {
 
   const grid = document.getElementById("medicineGrid");
+  const count = document.getElementById("medicineCount");
 
-  if (!medicines || medicines.length === 0) {
+  count.textContent = `${list.length} products`;
+
+  if (list.length === 0) {
 
     grid.innerHTML = `
-      <div class="loading">
-        No medicines available.
+      <div class="empty">
+        <h3>No medicines found</h3>
+        <p>Try another search or category.</p>
       </div>
     `;
 
     return;
   }
 
-  grid.innerHTML = medicines.map(medicine => `
+  grid.innerHTML = list.map(medicine => `
 
-    <article
-      class="medicine-card"
-      data-name="${medicine.name.toLowerCase()}"
-      data-category="${medicine.category}"
-    >
+    <article class="medicine-card">
 
       <img
         class="medicine-image"
-        src="${medicine.image_url || "https://placehold.co/600x400?text=Medicine"}"
-        alt="${medicine.name}"
+        src="${medicine.image || 'https://via.placeholder.com/500x400?text=Medicine'}"
+        alt="${escapeHTML(medicine.name)}"
       >
 
       <div class="medicine-info">
 
-        <span class="medicine-category">
-          ${medicine.category || "Healthcare"}
-        </span>
+        <div class="medicine-category">
+          ${escapeHTML(medicine.category)}
+        </div>
 
-        <h3>
-          ${medicine.name}
+        <h3 class="medicine-name">
+          ${escapeHTML(medicine.name)}
         </h3>
 
         <p class="medicine-description">
-          ${medicine.description || "Quality healthcare product."}
+          ${escapeHTML(medicine.description || "Healthcare product")}
         </p>
 
         <div class="medicine-bottom">
 
-          <span class="price">
-            ₹${Number(medicine.price).toFixed(2)}
-          </span>
+          <div class="price">
+            ₹${Number(medicine.price).toLocaleString("en-IN")}
+          </div>
 
-          <span class="stock">
-            ${medicine.stock > 0
-              ? `${medicine.stock} available`
-              : "Out of stock"}
-          </span>
+          <button
+            class="add-btn"
+            onclick="addToCart('${medicine.id}')"
+          >
+            + Add
+          </button>
 
+        </div>
+
+        <div class="stock">
+          ${medicine.stock > 0
+            ? `${medicine.stock} in stock`
+            : "Out of stock"}
         </div>
 
       </div>
@@ -112,154 +89,256 @@ function displayMedicines(medicines) {
 }
 
 
-// ===============================
-// SEARCH
-// ===============================
+function escapeHTML(text) {
 
-const searchInput =
-  document.getElementById("medicineSearch");
+  const div = document.createElement("div");
+  div.textContent = text ?? "";
 
-const categoryFilter =
-  document.getElementById("categoryFilter");
-
-
-function filterMedicines() {
-
-  const search =
-    searchInput.value.toLowerCase();
-
-  const category =
-    categoryFilter.value;
-
-  const cards =
-    document.querySelectorAll(".medicine-card");
-
-  cards.forEach(card => {
-
-    const name =
-      card.dataset.name;
-
-    const cardCategory =
-      card.dataset.category;
-
-    const matchesSearch =
-      name.includes(search);
-
-    const matchesCategory =
-      category === "all" ||
-      cardCategory === category;
-
-    card.style.display =
-      matchesSearch && matchesCategory
-        ? ""
-        : "none";
-
-  });
+  return div.innerHTML;
 }
 
 
-searchInput.addEventListener(
-  "input",
-  filterMedicines
-);
+function searchMedicines() {
 
-categoryFilter.addEventListener(
-  "change",
-  filterMedicines
-);
+  const query =
+    document.getElementById("searchInput")
+    .value
+    .toLowerCase()
+    .trim();
 
+  let filtered = medicines.filter(medicine => {
 
-// ===============================
-// APPOINTMENT
-// ===============================
+    const searchable = `
+      ${medicine.name}
+      ${medicine.category}
+      ${medicine.description}
+    `.toLowerCase();
 
-const appointmentForm =
-  document.getElementById("appointmentForm");
+    return searchable.includes(query);
+  });
 
+  if (currentCategory !== "All") {
 
-appointmentForm.addEventListener(
-  "submit",
-  async function(event) {
-
-    event.preventDefault();
-
-    const status =
-      document.getElementById("appointmentStatus");
-
-    status.textContent =
-      "Booking appointment...";
-
-
-    const appointment = {
-
-      patient_name:
-        document.getElementById("patientName").value,
-
-      phone:
-        document.getElementById("patientPhone").value,
-
-      email:
-        document.getElementById("patientEmail").value,
-
-      doctor:
-        document.getElementById("doctorName").value,
-
-      appointment_date:
-        document.getElementById("appointmentDate").value,
-
-      appointment_time:
-        document.getElementById("appointmentTime").value,
-
-      message:
-        document.getElementById("appointmentMessage").value
-
-    };
-
-
-    const { error } =
-      await supabaseClient
-        .from("appointments")
-        .insert([appointment]);
-
-
-    if (error) {
-
-      console.error(error);
-
-      status.textContent =
-        "Unable to book appointment. Please try again.";
-
-      return;
-    }
-
-
-    status.textContent =
-      "✓ Appointment booked successfully!";
-
-    appointmentForm.reset();
+    filtered = filtered.filter(
+      medicine => medicine.category === currentCategory
+    );
 
   }
-);
+
+  renderMedicines(filtered);
+}
 
 
-// ===============================
-// DOCTOR BOOKING
-// ===============================
+function filterCategory(category) {
 
-function bookDoctor(doctor) {
+  currentCategory = category;
 
-  document.getElementById("doctorName").value =
-    doctor;
+  searchMedicines();
 
-  document.getElementById("appointment")
+  document
+    .getElementById("medicines")
     .scrollIntoView({
       behavior: "smooth"
     });
 }
 
 
-// ===============================
-// INITIAL LOAD
-// ===============================
+function addToCart(id) {
 
-loadMedicines();
+  const medicine = medicines.find(
+    item => item.id === id
+  );
+
+  if (!medicine) return;
+
+  if (Number(medicine.stock) <= 0) {
+
+    alert("This medicine is currently out of stock.");
+    return;
+
+  }
+
+  const existing = cart.find(
+    item => item.id === id
+  );
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+
+    cart.push({
+      id: medicine.id,
+      name: medicine.name,
+      price: Number(medicine.price),
+      image: medicine.image,
+      quantity: 1
+    });
+
+  }
+
+  saveCart();
+
+  updateCart();
+
+  openCart();
+}
+
+
+function removeFromCart(id) {
+
+  cart = cart.filter(
+    item => item.id !== id
+  );
+
+  saveCart();
+
+  updateCart();
+}
+
+
+function saveCart() {
+
+  localStorage.setItem(
+    "clinikCart",
+    JSON.stringify(cart)
+  );
+
+}
+
+
+function updateCart() {
+
+  const container =
+    document.getElementById("cartItems");
+
+  const count =
+    document.getElementById("cartCount");
+
+  const total =
+    document.getElementById("cartTotal");
+
+  const totalItems =
+    cart.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+
+  count.textContent = totalItems;
+
+  if (cart.length === 0) {
+
+    container.innerHTML = `
+      <div class="empty">
+        <h3>Your cart is empty</h3>
+        <p>Add some medicines to continue.</p>
+      </div>
+    `;
+
+    total.textContent = "0";
+
+    return;
+  }
+
+  container.innerHTML = cart.map(item => `
+
+    <div class="cart-item">
+
+      <img
+        src="${item.image || 'https://via.placeholder.com/100?text=Medicine'}"
+        alt="${escapeHTML(item.name)}"
+      >
+
+      <div class="cart-item-info">
+
+        <h4>
+          ${escapeHTML(item.name)}
+        </h4>
+
+        <p>
+          ₹${item.price.toLocaleString("en-IN")}
+          × ${item.quantity}
+        </p>
+
+      </div>
+
+      <button
+        class="remove-item"
+        onclick="removeFromCart('${item.id}')"
+      >
+        ✕
+      </button>
+
+    </div>
+
+  `).join("");
+
+  const cartTotal = cart.reduce(
+    (sum, item) =>
+      sum + item.price * item.quantity,
+    0
+  );
+
+  total.textContent =
+    cartTotal.toLocaleString("en-IN");
+}
+
+
+function openCart() {
+
+  document
+    .getElementById("cart")
+    .classList.add("show");
+
+  document
+    .getElementById("cartOverlay")
+    .classList.add("show");
+
+}
+
+
+function closeCart() {
+
+  document
+    .getElementById("cart")
+    .classList.remove("show");
+
+  document
+    .getElementById("cartOverlay")
+    .classList.remove("show");
+
+}
+
+
+function checkout() {
+
+  if (cart.length === 0) {
+
+    alert("Your cart is empty.");
+    return;
+
+  }
+
+  alert(
+    "Order system is ready to connect. " +
+    "For now, your cart contains " +
+    cart.reduce((sum, item) => sum + item.quantity, 0) +
+    " item(s)."
+  );
+
+}
+
+
+window.addEventListener("storage", () => {
+
+  medicines =
+    JSON.parse(
+      localStorage.getItem("clinikMedicines")
+    ) || [];
+
+  renderMedicines();
+
+});
+
+
+renderMedicines();
+updateCart();
