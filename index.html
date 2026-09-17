@@ -3,413 +3,161 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>MediCare Clinic</title>
-
+  <title>Clinik — Online Medicine Store</title>
   <link rel="stylesheet" href="style.css">
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
 <header class="navbar">
-  <a href="#" class="logo">
-    <span>✚</span> MediCare
-  </a>
+  <div class="logo">
+    <span>✚</span> Clinik
+  </div>
 
   <nav>
     <a href="#home">Home</a>
-    <a href="#services">Services</a>
-    <a href="#doctors">Doctors</a>
     <a href="#medicines">Medicines</a>
-    <a href="#appointment">Appointment</a>
+    <a href="#categories">Categories</a>
   </nav>
 
-  <a href="#appointment" class="nav-btn">
-    Book Appointment
-  </a>
+  <button class="cart-btn" onclick="openCart()">
+    🛒 Cart <span id="cartCount">0</span>
+  </button>
 </header>
 
 
-<!-- HERO -->
+<main>
 
 <section class="hero" id="home">
-
   <div class="hero-content">
-
-    <div class="badge">
-      ● Trusted Healthcare
-    </div>
+    <p class="tag">YOUR HEALTH, OUR PRIORITY</p>
 
     <h1>
-      Your Health.
-      <span>Our Priority.</span>
+      Medicines made
+      <span>simple.</span>
     </h1>
 
-    <p>
-      Modern healthcare, experienced doctors and quality medicines
-      — all in one place.
+    <p class="hero-text">
+      Find the medicines and healthcare products you need,
+      all in one simple place.
     </p>
 
-    <div class="hero-buttons">
-      <a href="#appointment" class="primary-btn">
-        Book Appointment →
-      </a>
-
-      <a href="#medicines" class="secondary-btn">
-        View Medicines
-      </a>
-    </div>
-
-    <div class="hero-stats">
-
-      <div>
-        <strong>15+</strong>
-        <small>Years Experience</small>
-      </div>
-
-      <div>
-        <strong>25K+</strong>
-        <small>Happy Patients</small>
-      </div>
-
-      <div>
-        <strong>20+</strong>
-        <small>Medical Experts</small>
-      </div>
-
-    </div>
-
+    <a href="#medicines" class="hero-btn">
+      Browse Medicines →
+    </a>
   </div>
 
   <div class="hero-card">
-
-    <div class="doctor-icon">
-      👨‍⚕️
-    </div>
-
-    <h3>Expert Healthcare</h3>
-
-    <p>
-      Professional medical care from experienced specialists.
-    </p>
-
-    <div class="availability">
-      <span></span>
-      Open Today
-    </div>
-
+    <div class="medical-icon">✚</div>
+    <h3>Healthcare Store</h3>
+    <p>Quality medicines at transparent prices.</p>
   </div>
-
 </section>
 
 
-<!-- SERVICES -->
-
-<section class="section" id="services">
-
-  <div class="section-heading">
-
-    <span class="eyebrow">OUR SERVICES</span>
-
-    <h2>Complete Healthcare Services</h2>
-
-    <p>
-      Everything you need for your health and wellbeing.
-    </p>
-
-  </div>
-
-
-  <div class="services-grid">
-
-    <div class="glass-card">
-      <div class="service-icon">🩺</div>
-      <h3>General Consultation</h3>
-      <p>
-        Professional consultation for common health concerns.
-      </p>
-    </div>
-
-    <div class="glass-card">
-      <div class="service-icon">❤️</div>
-      <h3>Cardiology</h3>
-      <p>
-        Comprehensive heart health consultation and care.
-      </p>
-    </div>
-
-    <div class="glass-card">
-      <div class="service-icon">🧠</div>
-      <h3>Neurology</h3>
-      <p>
-        Specialist care for neurological conditions.
-      </p>
-    </div>
-
-    <div class="glass-card">
-      <div class="service-icon">🦷</div>
-      <h3>Dental Care</h3>
-      <p>
-        Complete dental examination and treatment services.
-      </p>
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- DOCTORS -->
-
-<section class="section doctors-section" id="doctors">
-
-  <div class="section-heading">
-
-    <span class="eyebrow">OUR DOCTORS</span>
-
-    <h2>Meet Our Specialists</h2>
-
-  </div>
-
-
-  <div class="doctors-grid">
-
-    <div class="doctor-card">
-      <div class="doctor-photo">👨‍⚕️</div>
-
-      <h3>Dr. Rahul Sharma</h3>
-      <p>General Physician</p>
-
-      <button onclick="bookDoctor('Dr. Rahul Sharma')">
-        Book Appointment
-      </button>
-    </div>
-
-
-    <div class="doctor-card">
-      <div class="doctor-photo">👩‍⚕️</div>
-
-      <h3>Dr. Priya Mehta</h3>
-      <p>Cardiologist</p>
-
-      <button onclick="bookDoctor('Dr. Priya Mehta')">
-        Book Appointment
-      </button>
-    </div>
-
-
-    <div class="doctor-card">
-      <div class="doctor-photo">👨‍⚕️</div>
-
-      <h3>Dr. Arjun Kapoor</h3>
-      <p>Neurologist</p>
-
-      <button onclick="bookDoctor('Dr. Arjun Kapoor')">
-        Book Appointment
-      </button>
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- MEDICINES -->
-
-<section class="section" id="medicines">
-
-  <div class="section-heading">
-
-    <span class="eyebrow">PHARMACY</span>
-
-    <h2>Medicines & Healthcare</h2>
-
-    <p>
-      Products added by the clinic administrator.
-    </p>
-
-  </div>
-
-
-  <div class="medicine-controls">
-
+<section class="search-section">
+  <div class="search-box">
+    🔎
     <input
-      type="search"
-      id="medicineSearch"
+      type="text"
+      id="searchInput"
       placeholder="Search medicines..."
+      oninput="searchMedicines()"
     >
+  </div>
+</section>
 
-    <select id="categoryFilter">
-      <option value="all">All Categories</option>
-      <option value="Pain Relief">Pain Relief</option>
-      <option value="Cold & Flu">Cold & Flu</option>
-      <option value="Vitamins">Vitamins</option>
-      <option value="First Aid">First Aid</option>
-      <option value="Other">Other</option>
-    </select>
 
+<section id="categories" class="categories-section">
+
+  <div class="section-heading">
+    <p>EXPLORE</p>
+    <h2>Categories</h2>
   </div>
 
+  <div class="category-grid">
 
-  <div id="medicineGrid" class="medicine-grid">
+    <button onclick="filterCategory('All')" class="category-card">
+      <span>💊</span>
+      <strong>All Medicines</strong>
+    </button>
 
-    <div class="loading">
-      Loading medicines...
-    </div>
+    <button onclick="filterCategory('Pain Relief')" class="category-card">
+      <span>🩹</span>
+      <strong>Pain Relief</strong>
+    </button>
+
+    <button onclick="filterCategory('Cold & Flu')" class="category-card">
+      <span>🤧</span>
+      <strong>Cold & Flu</strong>
+    </button>
+
+    <button onclick="filterCategory('Vitamins')" class="category-card">
+      <span>🍊</span>
+      <strong>Vitamins</strong>
+    </button>
+
+    <button onclick="filterCategory('Digestive')" class="category-card">
+      <span>🫃</span>
+      <strong>Digestive</strong>
+    </button>
 
   </div>
 
 </section>
 
 
-<!-- APPOINTMENT -->
+<section id="medicines" class="medicines-section">
 
-<section class="appointment-section" id="appointment">
-
-  <div class="appointment-container">
-
-    <div class="appointment-info">
-
-      <span class="eyebrow">APPOINTMENT</span>
-
-      <h2>Book Your Appointment</h2>
-
-      <p>
-        Schedule an appointment with one of our healthcare
-        professionals.
-      </p>
-
-      <div class="contact-item">
-        📞
-        <div>
-          <strong>Call Us</strong>
-          <span>+91 98765 43210</span>
-        </div>
-      </div>
-
-      <div class="contact-item">
-        📍
-        <div>
-          <strong>Location</strong>
-          <span>Your Clinic Address</span>
-        </div>
-      </div>
-
+  <div class="section-heading medicines-heading">
+    <div>
+      <p>SHOP</p>
+      <h2>Medicines</h2>
     </div>
 
-
-    <form id="appointmentForm" class="appointment-form">
-
-      <input
-        type="text"
-        id="patientName"
-        placeholder="Your Name"
-        required
-      >
-
-      <input
-        type="tel"
-        id="patientPhone"
-        placeholder="Phone Number"
-        required
-      >
-
-      <input
-        type="email"
-        id="patientEmail"
-        placeholder="Email Address"
-      >
-
-      <select id="doctorName" required>
-
-        <option value="">
-          Select Doctor
-        </option>
-
-        <option>
-          Dr. Rahul Sharma
-        </option>
-
-        <option>
-          Dr. Priya Mehta
-        </option>
-
-        <option>
-          Dr. Arjun Kapoor
-        </option>
-
-      </select>
-
-
-      <input
-        type="date"
-        id="appointmentDate"
-        required
-      >
-
-      <select id="appointmentTime" required>
-
-        <option value="">
-          Select Time
-        </option>
-
-        <option>09:00 AM</option>
-        <option>10:00 AM</option>
-        <option>11:00 AM</option>
-        <option>02:00 PM</option>
-        <option>03:00 PM</option>
-        <option>04:00 PM</option>
-        <option>05:00 PM</option>
-
-      </select>
-
-
-      <textarea
-        id="appointmentMessage"
-        placeholder="Reason for appointment"
-        rows="4"
-      ></textarea>
-
-
-      <button type="submit" class="primary-btn">
-        Book Appointment
-      </button>
-
-      <p id="appointmentStatus"></p>
-
-    </form>
-
+    <span id="medicineCount"></span>
   </div>
+
+  <div id="medicineGrid" class="medicine-grid"></div>
 
 </section>
 
+</main>
 
-<!-- FOOTER -->
+
+<!-- CART -->
+
+<div id="cartOverlay" class="cart-overlay" onclick="closeCart()"></div>
+
+<aside id="cart" class="cart">
+
+  <div class="cart-header">
+    <h2>Your Cart</h2>
+    <button onclick="closeCart()">✕</button>
+  </div>
+
+  <div id="cartItems"></div>
+
+  <div class="cart-bottom">
+
+    <div class="cart-total">
+      <span>Total</span>
+      <strong>₹<span id="cartTotal">0</span></strong>
+    </div>
+
+    <button class="checkout-btn" onclick="checkout()">
+      Place Order
+    </button>
+
+  </div>
+
+</aside>
+
 
 <footer>
-
-  <div class="footer-logo">
-    ✚ MediCare
-  </div>
-
-  <p>
-    Quality healthcare for you and your family.
-  </p>
-
-  <div class="footer-links">
-    <a href="#home">Home</a>
-    <a href="#services">Services</a>
-    <a href="#medicines">Medicines</a>
-    <a href="#appointment">Contact</a>
-  </div>
-
-  <p class="copyright">
-    © 2026 MediCare Clinic. All rights reserved.
-  </p>
-
+  <div class="footer-logo">✚ Clinik</div>
+  <p>Healthcare made simple.</p>
+  <p class="copyright">© 2026 Clinik. All rights reserved.</p>
 </footer>
 
 
