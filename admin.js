@@ -1,359 +1,299 @@
-const SUPABASE_URL = "cdmfgppdycpzouvnhmlq";
-
-const SUPABASE_ANON_KEY = ".eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkbWZncHBkeWNwem91dm5obWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2NDE5ODcsImV4cCI6MjEwNTIxNzk4N30.RWHHVNhSwJWyBxEgQcqTb0-8oWXHy1XzGI8ORfIeMeM"
-
-
-
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+/* =========================
+   CLINIK ADMIN
+========================= */
 
 
-// ===============================
-// ELEMENTS
-// ===============================
+/* CHANGE THESE IF YOU WANT */
 
-const loginScreen =
-  document.getElementById("loginScreen");
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "admin123";
 
-const dashboard =
-  document.getElementById("dashboard");
+
+let medicines =
+  JSON.parse(
+    localStorage.getItem("clinikMedicines")
+  ) || [];
+
+
+let editingId = null;
+let selectedImage = "";
+
+
+/* =========================
+   LOGIN
+========================= */
 
 const loginForm =
   document.getElementById("loginForm");
 
-const logoutButton =
-  document.getElementById("logoutButton");
+
+loginForm.addEventListener("submit", function(e) {
+
+  e.preventDefault();
+
+  const username =
+    document.getElementById("username").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+  const error =
+    document.getElementById("loginError");
 
 
-// ===============================
-// CHECK LOGIN
-// ===============================
+  if (
+    username === ADMIN_USERNAME &&
+    password === ADMIN_PASSWORD
+  ) {
 
-async function checkUser() {
-
-  const {
-    data: { session }
-  } = await supabaseClient
-    .auth
-    .getSession();
-
-
-  if (session) {
+    sessionStorage.setItem(
+      "clinikAdminLoggedIn",
+      "true"
+    );
 
     showDashboard();
 
   } else {
 
-    showLogin();
+    error.textContent =
+      "Incorrect username or password.";
 
   }
 
-}
+});
 
-
-// ===============================
-// LOGIN
-// ===============================
-
-loginForm.addEventListener(
-  "submit",
-  async function(event) {
-
-    event.preventDefault();
-
-
-    const email =
-      document.getElementById("loginEmail").value;
-
-    const password =
-      document.getElementById("loginPassword").value;
-
-
-    const message =
-      document.getElementById("loginMessage");
-
-
-    message.textContent =
-      "Logging in...";
-
-
-    const { error } =
-      await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
-
-    if (error) {
-
-      message.textContent =
-        "Invalid email or password.";
-
-      console.error(error);
-
-      return;
-    }
-
-
-    message.textContent = "";
-
-    showDashboard();
-
-  }
-);
-
-
-// ===============================
-// LOGOUT
-// ===============================
-
-logoutButton.addEventListener(
-  "click",
-  async function() {
-
-    await supabaseClient.auth.signOut();
-
-    showLogin();
-
-  }
-);
-
-
-// ===============================
-// SHOW LOGIN
-// ===============================
-
-function showLogin() {
-
-  loginScreen.classList.remove("hidden");
-
-  dashboard.classList.add("hidden");
-
-}
-
-
-// ===============================
-// SHOW DASHBOARD
-// ===============================
 
 function showDashboard() {
 
-  loginScreen.classList.add("hidden");
+  document
+    .getElementById("loginScreen")
+    .classList.add("hidden");
 
-  dashboard.classList.remove("hidden");
+  document
+    .getElementById("dashboard")
+    .classList.remove("hidden");
 
-  loadAdminData();
+  renderAdminMedicines();
+
+  updateStats();
 
 }
 
 
-// ===============================
-// ADD MEDICINE
-// ===============================
+function logout() {
 
-const medicineForm =
-  document.getElementById("medicineForm");
+  sessionStorage.removeItem(
+    "clinikAdminLoggedIn"
+  );
 
+  location.reload();
 
-medicineForm.addEventListener(
-  "submit",
-  async function(event) {
+}
 
-    event.preventDefault();
 
-
-    const message =
-      document.getElementById("medicineMessage");
-
-
-    message.textContent =
-      "Uploading medicine...";
-
-
-    const file =
-      document.getElementById("medicineImage").files[0];
-
-
-    if (!file) {
-
-      message.textContent =
-        "Please select an image.";
-
-      return;
-
-    }
-
-
-    const name =
-      document.getElementById("medicineName").value;
-
-    const category =
-      document.getElementById("medicineCategory").value;
-
-    const price =
-      Number(
-        document.getElementById("medicinePrice").value
-      );
-
-    const stock =
-      Number(
-        document.getElementById("medicineStock").value
-      );
-
-    const description =
-      document.getElementById("medicineDescription").value;
-
-
-    // Create unique file name
-
-    const fileName =
-      `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-
-
-    // Upload image
-
-    const {
-      error: uploadError
-    } = await supabaseClient
-      .storage
-      .from("medicine-images")
-      .upload(
-        fileName,
-        file
-      );
-
-
-    if (uploadError) {
-
-      console.error(uploadError);
-
-      message.textContent =
-        "Image upload failed.";
-
-      return;
-
-    }
-
-
-    // Get public image URL
-
-    const {
-      data: imageData
-    } =
-      supabaseClient
-        .storage
-        .from("medicine-images")
-        .getPublicUrl(fileName);
-
-
-    const imageUrl =
-      imageData.publicUrl;
-
-
-    // Save medicine information
-
-    const {
-      error: databaseError
-    } =
-      await supabaseClient
-        .from("medicines")
-        .insert([{
-
-          name,
-
-          category,
-
-          price,
-
-          stock,
-
-          description,
-
-          image_url: imageUrl
-
-        }]);
-
-
-    if (databaseError) {
-
-      console.error(databaseError);
-
-      message.textContent =
-        "Could not save medicine.";
-
-      return;
-
-    }
-
-
-    message.textContent =
-      "✓ Medicine added successfully!";
-
-
-    medicineForm.reset();
-
-    document.getElementById(
-      "imagePreview"
-    ).innerHTML = "";
-
-
-    loadAdminData();
-
-  }
-);
-
-
-// ===============================
-// IMAGE PREVIEW
-// ===============================
+/* =========================
+   IMAGE UPLOAD
+========================= */
 
 document
   .getElementById("medicineImage")
-  .addEventListener(
-    "change",
-    function(event) {
+  .addEventListener("change", function(e) {
 
-      const file =
-        event.target.files[0];
+    const file = e.target.files[0];
 
-      if (!file) return;
+    if (!file) return;
 
 
-      const url =
-        URL.createObjectURL(file);
+    if (file.size > 1500000) {
 
+      alert(
+        "Please choose an image smaller than 1.5 MB."
+      );
 
-      document.getElementById(
-        "imagePreview"
-      ).innerHTML = `
-        <img src="${url}" alt="Preview">
-      `;
+      e.target.value = "";
+
+      return;
 
     }
+
+
+    const reader =
+      new FileReader();
+
+
+    reader.onload = function(event) {
+
+      selectedImage =
+        event.target.result;
+
+      const preview =
+        document.getElementById("imagePreview");
+
+      preview.src = selectedImage;
+
+      preview.style.display = "block";
+
+      document
+        .getElementById("uploadText")
+        .style.display = "none";
+
+    };
+
+
+    reader.readAsDataURL(file);
+
+  });
+
+
+/* =========================
+   SAVE MEDICINES
+========================= */
+
+function saveMedicines() {
+
+  localStorage.setItem(
+    "clinikMedicines",
+    JSON.stringify(medicines)
   );
-
-
-// ===============================
-// LOAD ADMIN DATA
-// ===============================
-
-async function loadAdminData() {
-
-  await loadAdminMedicines();
-
-  await loadAppointments();
 
 }
 
 
-// ===============================
-// MEDICINE LIST
-// ===============================
+/* =========================
+   ADD / EDIT
+========================= */
 
-async function loadAdminMedicines() {
+document
+  .getElementById("medicineForm")
+  .addEventListener("submit", function(e) {
+
+    e.preventDefault();
+
+
+    const name =
+      document
+        .getElementById("medicineName")
+        .value
+        .trim();
+
+
+    const category =
+      document
+        .getElementById("medicineCategory")
+        .value;
+
+
+    const price =
+      Number(
+        document
+          .getElementById("medicinePrice")
+          .value
+      );
+
+
+    const stock =
+      Number(
+        document
+          .getElementById("medicineStock")
+          .value
+      );
+
+
+    const description =
+      document
+        .getElementById("medicineDescription")
+        .value
+        .trim();
+
+
+    if (!name || price < 0 || stock < 0) {
+
+      alert("Please enter valid product details.");
+
+      return;
+
+    }
+
+
+    /* EDIT */
+
+    if (editingId) {
+
+      const medicine =
+        medicines.find(
+          item => item.id === editingId
+        );
+
+
+      if (!medicine) return;
+
+
+      medicine.name = name;
+      medicine.category = category;
+      medicine.price = price;
+      medicine.stock = stock;
+      medicine.description = description;
+
+
+      if (selectedImage) {
+        medicine.image = selectedImage;
+      }
+
+
+      alert("Medicine updated.");
+
+    }
+
+
+    /* NEW */
+
+    else {
+
+      const medicine = {
+
+        id:
+          Date.now().toString(),
+
+        name: name,
+
+        category: category,
+
+        price: price,
+
+        stock: stock,
+
+        description: description,
+
+        image:
+          selectedImage ||
+          "https://via.placeholder.com/500x400?text=Medicine"
+
+      };
+
+
+      medicines.unshift(medicine);
+
+      alert("Medicine added.");
+
+    }
+
+
+    saveMedicines();
+
+    resetForm();
+
+    renderAdminMedicines();
+
+    updateStats();
+
+  });
+
+
+/* =========================
+   RENDER ADMIN PRODUCTS
+========================= */
+
+function renderAdminMedicines() {
 
   const container =
     document.getElementById(
@@ -361,42 +301,37 @@ async function loadAdminMedicines() {
     );
 
 
-  const { data, error } =
-    await supabaseClient
-      .from("medicines")
-      .select("*")
-      .order(
-        "created_at",
-        { ascending: false }
-      );
+  const search =
+    (
+      document
+        .getElementById("adminSearch")
+        ?.value || ""
+    )
+      .toLowerCase()
+      .trim();
 
 
-  if (error) {
+  const filtered =
+    medicines.filter(item => {
 
-    container.textContent =
-      "Unable to load medicines.";
+      return `
+        ${item.name}
+        ${item.category}
+        ${item.description}
+      `
+        .toLowerCase()
+        .includes(search);
 
-    return;
-
-  }
-
-
-  document.getElementById(
-    "medicineCount"
-  ).textContent =
-    data.length;
+    });
 
 
-  document.getElementById(
-    "productCount"
-  ).textContent =
-    data.length;
+  if (filtered.length === 0) {
 
-
-  if (!data.length) {
-
-    container.textContent =
-      "No medicines added yet.";
+    container.innerHTML = `
+      <div class="empty-admin">
+        No medicines found.
+      </div>
+    `;
 
     return;
 
@@ -404,40 +339,52 @@ async function loadAdminMedicines() {
 
 
   container.innerHTML =
-    data.map(medicine => `
+    filtered.map(item => `
 
-      <div class="admin-medicine">
+      <div class="admin-product">
 
-        <div class="admin-medicine-info">
+        <img
+          src="${item.image}"
+          alt="${escapeHTML(item.name)}"
+        >
 
-          <img
-            src="${medicine.image_url || "https://placehold.co/100x100"}"
-            alt="${medicine.name}"
-          >
+        <div class="product-details">
 
-          <div>
+          <h3>
+            ${escapeHTML(item.name)}
+          </h3>
 
-            <strong>
-              ${medicine.name}
-            </strong>
+          <p>
+            ${escapeHTML(item.category)}
+            · Stock: ${item.stock}
+          </p>
 
-            <small>
-              ${medicine.category}
-              · ₹${medicine.price}
-              · Stock: ${medicine.stock}
-            </small>
+        </div>
+
+        <div>
+
+          <div class="product-price">
+            ₹${Number(item.price).toLocaleString("en-IN")}
+          </div>
+
+          <div class="product-actions">
+
+            <button
+              onclick="editMedicine('${item.id}')"
+            >
+              Edit
+            </button>
+
+            <button
+              class="delete"
+              onclick="deleteMedicine('${item.id}')"
+            >
+              Delete
+            </button>
 
           </div>
 
         </div>
-
-
-        <button
-          class="delete-btn"
-          onclick="deleteMedicine('${medicine.id}')"
-        >
-          Delete
-        </button>
 
       </div>
 
@@ -446,127 +393,238 @@ async function loadAdminMedicines() {
 }
 
 
-// ===============================
-// DELETE MEDICINE
-// ===============================
+/* =========================
+   EDIT
+========================= */
 
-async function deleteMedicine(id) {
+function editMedicine(id) {
+
+  const medicine =
+    medicines.find(
+      item => item.id === id
+    );
+
+  if (!medicine) return;
+
+
+  editingId = id;
+
+  selectedImage = medicine.image;
+
+
+  document.getElementById("medicineName").value =
+    medicine.name;
+
+  document.getElementById("medicineCategory").value =
+    medicine.category;
+
+  document.getElementById("medicinePrice").value =
+    medicine.price;
+
+  document.getElementById("medicineStock").value =
+    medicine.stock;
+
+  document.getElementById("medicineDescription").value =
+    medicine.description || "";
+
+
+  const preview =
+    document.getElementById("imagePreview");
+
+  preview.src = medicine.image;
+
+  preview.style.display = "block";
+
+
+  document
+    .getElementById("uploadText")
+    .style.display = "none";
+
+
+  document
+    .getElementById("formTitle")
+    .textContent = "Edit Medicine";
+
+
+  document
+    .getElementById("saveButtonText")
+    .textContent = "Save Changes";
+
+
+  document
+    .getElementById("cancelEdit")
+    .classList.remove("hidden");
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
+function deleteMedicine(id) {
+
+  const medicine =
+    medicines.find(
+      item => item.id === id
+    );
+
+
+  if (!medicine) return;
+
 
   const confirmed =
     confirm(
-      "Delete this medicine?"
+      `Delete "${medicine.name}"?`
     );
 
 
   if (!confirmed) return;
 
 
-  const { error } =
-    await supabaseClient
-      .from("medicines")
-      .delete()
-      .eq("id", id);
-
-
-  if (error) {
-
-    alert(
-      "Could not delete medicine."
+  medicines =
+    medicines.filter(
+      item => item.id !== id
     );
 
-    return;
 
-  }
+  saveMedicines();
 
+  renderAdminMedicines();
 
-  loadAdminData();
+  updateStats();
 
 }
 
 
-// ===============================
-// APPOINTMENTS
-// ===============================
+/* =========================
+   RESET
+========================= */
 
-async function loadAppointments() {
+function resetForm() {
 
-  const container =
-    document.getElementById(
-      "appointmentList"
-    );
+  editingId = null;
 
-
-  const { data, error } =
-    await supabaseClient
-      .from("appointments")
-      .select("*")
-      .order(
-        "created_at",
-        { ascending: false }
-      );
+  selectedImage = "";
 
 
-  if (error) {
-
-    container.textContent =
-      "Unable to load appointments.";
-
-    return;
-
-  }
+  document
+    .getElementById("medicineForm")
+    .reset();
 
 
-  document.getElementById(
-    "appointmentCount"
-  ).textContent =
-    data.length;
+  document
+    .getElementById("imagePreview")
+    .style.display = "none";
 
 
-  if (!data.length) {
-
-    container.textContent =
-      "No appointments yet.";
-
-    return;
-
-  }
+  document
+    .getElementById("imagePreview")
+    .src = "";
 
 
-  container.innerHTML =
-    data.map(appointment => `
+  document
+    .getElementById("uploadText")
+    .style.display = "block";
 
-      <div class="appointment-row">
 
-        <strong>
-          ${appointment.patient_name}
-        </strong>
+  document
+    .getElementById("formTitle")
+    .textContent = "Add Medicine";
 
-        <span>
-          📞 ${appointment.phone}
-        </span>
 
-        <span>
-          👨‍⚕️ ${appointment.doctor}
-        </span>
+  document
+    .getElementById("saveButtonText")
+    .textContent = "+ Add Medicine";
 
-        <span>
-          📅 ${appointment.appointment_date}
-          · ${appointment.appointment_time}
-        </span>
 
-        <span>
-          ${appointment.message || ""}
-        </span>
-
-      </div>
-
-    `).join("");
+  document
+    .getElementById("cancelEdit")
+    .classList.add("hidden");
 
 }
 
 
-// ===============================
-// START
-// ===============================
+function cancelEdit() {
 
-checkUser();
+  resetForm();
+
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+function updateStats() {
+
+  document
+    .getElementById("totalMedicines")
+    .textContent = medicines.length;
+
+
+  const categories =
+    new Set(
+      medicines.map(
+        item => item.category
+      )
+    );
+
+
+  document
+    .getElementById("totalCategories")
+    .textContent =
+      categories.size;
+
+
+  const stock =
+    medicines.reduce(
+      (total, item) =>
+        total + Number(item.stock || 0),
+      0
+    );
+
+
+  document
+    .getElementById("totalStock")
+    .textContent = stock;
+
+}
+
+
+/* =========================
+   SECURITY DISPLAY HELPER
+========================= */
+
+function escapeHTML(text) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    text ?? "";
+
+  return div.innerHTML;
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+if (
+  sessionStorage.getItem(
+    "clinikAdminLoggedIn"
+  ) === "true"
+) {
+
+  showDashboard();
+
+}
