@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>MediCare Admin</title>
+
+  <link rel="stylesheet" href="admin.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+
+<!-- LOGIN -->
+
+<section id="loginScreen" class="login-screen">
+
+  <div class="login-card">
+
+    <div class="admin-logo">
+      ✚
+    </div>
+
+    <h1>Admin Login</h1>
+
+    <p>
+      MediCare Management Dashboard
+    </p>
+
+
+    <form id="loginForm">
+
+      <input
+        type="email"
+        id="loginEmail"
+        placeholder="Admin email"
+        required
+      >
+
+      <input
+        type="password"
+        id="loginPassword"
+        placeholder="Password"
+        required
+      >
+
+      <button type="submit">
+        Login
+      </button>
+
+      <div id="loginMessage"></div>
+
+    </form>
+
+  </div>
+
+</section>
+
+
+<!-- DASHBOARD -->
+
+<section id="dashboard" class="dashboard hidden">
+
+
+<header class="admin-header">
+
+  <div>
+
+    <h1>MediCare Admin</h1>
+
+    <p>Clinic Management Dashboard</p>
+
+  </div>
+
+  <button id="logoutButton">
+    Logout
+  </button>
+
+</header>
+
+
+<main class="admin-main">
+
+
+<!-- STATS -->
+
+<div class="stats-grid">
+
+  <div class="stat-card">
+
+    <span>💊</span>
+
+    <div>
+      <small>Medicines</small>
+      <strong id="medicineCount">0</strong>
+    </div>
+
+  </div>
+
+
+  <div class="stat-card">
+
+    <span>📅</span>
+
+    <div>
+      <small>Appointments</small>
+      <strong id="appointmentCount">0</strong>
+    </div>
+
+  </div>
+
+
+  <div class="stat-card">
+
+    <span>📦</span>
+
+    <div>
+      <small>Products</small>
+      <strong id="productCount">0</strong>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ADD MEDICINE -->
+
+<div class="admin-panel">
+
+  <div class="panel-header">
+
+    <div>
+      <h2>Add Medicine</h2>
+
+      <p>
+        Add a medicine to your public website.
+      </p>
+    </div>
+
+  </div>
+
+
+  <form id="medicineForm" class="medicine-form">
+
+
+    <div class="image-upload">
+
+      <label for="medicineImage">
+        Medicine Image
+      </label>
+
+      <input
+        type="file"
+        id="medicineImage"
+        accept="image/*"
+        required
+      >
+
+      <div id="imagePreview"></div>
+
+    </div>
+
+
+    <input
+      type="text"
+      id="medicineName"
+      placeholder="Medicine name"
+      required
+    >
+
+
+    <select id="medicineCategory" required>
+
+      <option value="">
+        Select category
+      </option>
+
+      <option>
+        Pain Relief
+      </option>
+
+      <option>
+        Cold & Flu
+      </option>
+
+      <option>
+        Vitamins
+      </option>
+
+      <option>
+        First Aid
+      </option>
+
+      <option>
+        Other
+      </option>
+
+    </select>
+
+
+    <input
+      type="number"
+      id="medicinePrice"
+      placeholder="Price ₹"
+      min="0"
+      step="0.01"
+      required
+    >
+
+
+    <input
+      type="number"
+      id="medicineStock"
+      placeholder="Stock quantity"
+      min="0"
+      required
+    >
+
+
+    <textarea
+      id="medicineDescription"
+      placeholder="Medicine description"
+      rows="5"
+    ></textarea>
+
+
+    <button type="submit">
+      + Add Medicine
+    </button>
+
+
+    <p id="medicineMessage"></p>
+
+  </form>
+
+</div>
+
+
+<!-- MEDICINE LIST -->
+
+<div class="admin-panel">
+
+  <div class="panel-header">
+
+    <div>
+
+      <h2>Medicine Inventory</h2>
+
+      <p>
+        Manage medicines displayed on the website.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div id="adminMedicineList">
+
+    Loading...
+
+  </div>
+
+</div>
+
+
+<!-- APPOINTMENTS -->
+
+<div class="admin-panel">
+
+  <div class="panel-header">
+
+    <div>
+
+      <h2>Appointments</h2>
+
+      <p>
+        Patient appointment requests.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div id="appointmentList">
+
+    Loading...
+
+  </div>
+
+</div>
+
+
+</main>
+
+</section>
+
+
+<script src="admin.js"></script>
+
+</body>
+</html>
